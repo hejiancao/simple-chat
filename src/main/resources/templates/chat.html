@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>在线聊天</title>
+    <style type="text/css">
+        #msg-view{
+
+            height: 400px;
+            overflow: scroll;
+        }
+    </style>
+</head>
+<body>
+<div id="msg-view">
+
+</div>
+<div id="msg-input">
+    <input id="msg"/>
+    <button id="sendBtn" onclick="sendMsg()">发送</button>
+</div>
+<script type="text/javascript">
+
+    var websocket = null;
+    if('WebSocket' in window){
+        websocket = new WebSocket("ws://localhost:8080/ws")
+    }
+    else{
+        alert('Not support websocket')
+    }
+
+    websocket.onopen = function (event) {
+        //连接时调用
+        alert("建立连接成功");
+    }
+
+    websocket.onmessage = function (event) {
+        var data = event.data;
+        if(typeof(data) == 'string'){
+            showMsg(data)
+        }else{
+            showMsg(data.ip + ':' + data.msg)
+        }
+    }
+
+    websocket.onerror = function () {
+        //异常时调用
+        alert("连接异常")
+    }
+
+    websocket.onclose = function () {
+        //关闭时调用
+    }
+
+    /* 页面关闭监听 */
+    window.onbeforeunload = function(){
+        websocket.close();
+    }
+
+
+    function sendMsg() {
+        var msg = document.getElementById('msg').value;
+        websocket.send(msg)
+    }
+
+    function showMsg(msg) {
+        document.getElementById('msg-view').innerHTML += msg + '<br/>';
+    }
+</script>
+</body>
+</html>
